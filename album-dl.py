@@ -2,6 +2,7 @@ import sys          # sys.exit
 import subprocess   # subprocess.call runs shell commands
 import os           # os.chdir
 import glob         # finding files in pwd
+import re           # substituting characters in filenames
 
 import scrapewiki
 import tags
@@ -29,14 +30,14 @@ def main():
         print("Aborting download.")
         sys.exit(1)
 
-    # downloadAudio(config["yt-url"])
+    downloadAudio(config["yt-url"])
 
-    audiofiles = getFilenames()
+    audiofiles = renameFiles()
 
     map = tags.mapTitlesToFiles(metadata, audiofiles)
 
     for key in map:
-        print(key, ":", map[key])
+        print("{:<25} {}".format(key, map[key]))
 
     res = input("Does this map look correct? [Y/n] ")
     if res == "N" or res == "n":
@@ -48,15 +49,26 @@ def main():
     print("Done!")
 
 
-def getFilenames():
+# Renames mp3 files to ones without symbols
+# Returns list of those filesnames
+def renameFiles():
     os.chdir("/tmp/album-dl")
-    return glob.glob("*.mp3")
+    names = glob.glob("*.mp3")
+    newNames = []
+    for name in names:
+        newName = name[:-4] # remove .mp3
+        newName = re.sub("[,\-\s'()*.]", "", newName)
+        newName = newName + ".mp3"
+        subprocess.call(["mv", name, newName])
+        newNames.append(newName)
+    return newNames
     
 
 def downloadAudio(url):
     print("Audio download starting.")
     ytdl = ["youtube-dl",
         "--ignore-config",
+        "-i",
         "-x", "--audio-format", "mp3",
         "-o", r"/tmp/album-dl/%(title)s.%(ext)s",
         url]

@@ -40,6 +40,8 @@ def mapTitlesToFiles(data, audiofiles):
 
         # remove characters inside parenthesis
         short_title = re.sub("(\(.*\))", "", title[1]).strip()
+        # remove all other characters
+        short_title = re.sub("[,\-\s'()*.]", "", short_title)
 
         regex = re.compile(r'' + short_title, re.IGNORECASE)
         selected_file = list(filter(regex.search, audiofiles))

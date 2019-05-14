@@ -34,6 +34,8 @@ def get_genre(table):
 
     # Then look at the next sibling of parent and find the first li element
     genreLi = genreLink.parent.next_sibling.find("li")
+    if genreLi.a:
+        return genreLi.a.string.title()
     if genreLi:
         return genreLi.string.title()
     
