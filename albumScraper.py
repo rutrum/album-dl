@@ -48,6 +48,7 @@ def applyTags(data, map):
 
     for track in data["tracks"]:
         audiofile = map[track[1]]
+        if audiofile == "": continue # When track was not downloaded
         
         # First apply tags
         tagCommand = ["mid3v2", audiofile,
