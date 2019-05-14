@@ -2,10 +2,11 @@ import requests
 from lxml import html
 from bs4 import BeautifulSoup
 
-import re       # For regular expressions
-import sys      # For system arguments
-import glob     # For finding audio files
-import os       # For change current directory
+import re           # For regular expressions
+import sys          # For system arguments
+import glob         # For finding audio files
+import os           # For change current directory
+import subprocess   # For running shell commands
 
 def main():
 
@@ -29,8 +30,40 @@ def main():
     # WARNING
     # Confirm with user that mapping is correct
 
-    print(map)
+    # print(map)
+
+    applyTags(data, map)
+    
+
+def applyTags(data, map):
+
+    # Create new folder to move files into
+    newDir = "/home/rutrum/music/" + data["artist"] + "/" + data["album"]
+    subprocess.call(["mkdir", "-p", newDir])
+
+    for track in data["tracks"]:
+        audiofile = map[track[1]]
         
+        # First apply tags
+        tagCommand = ["mid3v2", audiofile,
+            "-a", data["artist"],
+            "-A", data["album"],
+            "-g", data["genre"],
+            "-y", data["year"],
+            "-T", track[0] + "/" + data["trackTotal"],
+            "-t", track[1]]
+        subprocess.call(tagCommand)
+
+        # Now rename the file
+        newName = track[0] + " " + track[1] + ".mp3"
+        renameCommand = ["mv", audiofile, newName]
+        subprocess.call(renameCommand)
+
+        # Move the file to ~/music/artist/album/
+        subprocess.call(["cp", newName, newDir])
+        
+
+
 
 # Currently pattern matches on song titles,
 # in future should probably be song index, since song titles
@@ -70,7 +103,7 @@ def get_album_data(page):
 
     data["tracks"] = get_titles(page)
 
-    data["trackTotal"] = len(data["tracks"])
+    data["trackTotal"] = str(len(data["tracks"]))
 
     return data
 
