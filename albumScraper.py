@@ -1,23 +1,58 @@
-from lxml import html
 import requests
+from lxml import html
 from bs4 import BeautifulSoup
-import re
 
-import sys
+import re       # For regular expressions
+import sys      # For system arguments
+import glob     # For finding audio files
+import os       # For change current directory
 
 def main():
 
-    if len(sys.argv) < 2:
-        print("Need wikipedia url as argument.")
-    else:
+    # if len(sys.argv) < 2:
+    #     print("Need wikipedia url as argument.")
+    #     sys.exit(1)
+    
+    # page = requests.get(sys.argv[1])
+    page = requests.get("https://en.wikipedia.org/wiki/Twilight_in_Olympus")
+    soup = BeautifulSoup(page.text, "lxml")
+    data = get_album_data(soup)
 
-        page = requests.get(sys.argv[1])
+    # print(data)
 
-        soup = BeautifulSoup(page.text, "lxml")
+    os.chdir("/tmp")
+    audiofiles = glob.glob("*.mp3")
+    # print(audiofiles)
 
-        data = get_album_data(soup)
+    map = mapTitlesToFiles(data, audiofiles)
 
-        print(data)
+    # WARNING
+    # Confirm with user that mapping is correct
+
+    print(map)
+        
+
+# Currently pattern matches on song titles,
+# in future should probably be song index, since song titles
+# can vary greatly across documentation
+def mapTitlesToFiles(data, audiofiles):
+    mapToFile = dict()
+
+    for title in data["tracks"]:
+        title = title[1]
+
+        regex = re.compile(r'' + title, re.IGNORECASE)
+        selected_file = list(filter(regex.search, audiofiles))
+
+        if len(selected_file) > 0:
+            selected_file = selected_file[0]
+        else:
+            selected_file = ""
+
+        mapToFile[title] = selected_file
+    
+    return mapToFile
+
 
 def get_album_data(page):
 
@@ -71,7 +106,6 @@ def get_titles(page):
         if title:
             title = list(title[0]) # only one occurance in each table row
             title[0] = str(title[0]).zfill(2) # turns 1 into 01
-            # print(title[0])
             titles.append(title)
 
     return titles;
