@@ -30,9 +30,16 @@ def main():
     # WARNING
     # Confirm with user that mapping is correct
 
-    # print(map)
+    for key in map:
+        print(key, "\t:", map[key])
 
-    applyTags(data, map)
+    res = input("Does this map look correct? [y/N] ")
+    if res != "Y" and res != "y":
+        print("Aborting.")
+        sys.exit(1)
+    
+
+    # applyTags(data, map)
     
 
 def applyTags(data, map):
@@ -61,8 +68,6 @@ def applyTags(data, map):
 
         # Move the file to ~/music/artist/album/
         subprocess.call(["cp", newName, newDir])
-        
-
 
 
 # Currently pattern matches on song titles,
