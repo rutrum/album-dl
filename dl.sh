@@ -17,7 +17,7 @@ if [ -n $CONFIRM ] && [ "n" = "$CONFIRM" ]; then
 fi
 
 echo "Downloading videos now."
-youtube-dl --config-location $HOME/album-web-scraper/youtube-dl.conf $PLAYLISTURL
+youtube-dl --config-location ./youtube-dl.conf $PLAYLISTURL
 
 python3 albumScraper.py $WIKIURL
 
