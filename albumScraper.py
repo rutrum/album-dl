@@ -10,36 +10,34 @@ import subprocess   # For running shell commands
 
 def main():
 
-    # if len(sys.argv) < 2:
-    #     print("Need wikipedia url as argument.")
-    #     sys.exit(1)
+    if len(sys.argv) < 2:
+        print("Need wikipedia url as argument.")
+        sys.exit(1)
     
-    # page = requests.get(sys.argv[1])
-    page = requests.get("https://en.wikipedia.org/wiki/Twilight_in_Olympus")
+    page = requests.get(sys.argv[1])
+    # page = requests.get("https://en.wikipedia.org/wiki/Twilight_in_Olympus")
     soup = BeautifulSoup(page.text, "lxml")
     data = get_album_data(soup)
 
     # print(data)
 
-    os.chdir("/tmp")
+    os.chdir("/tmp/album-dl")
     audiofiles = glob.glob("*.mp3")
     # print(audiofiles)
 
     map = mapTitlesToFiles(data, audiofiles)
 
-    # WARNING
-    # Confirm with user that mapping is correct
-
     for key in map:
-        print(key, "\t:", map[key])
+        print(key, ":", map[key])
 
-    res = input("Does this map look correct? [y/N] ")
-    if res != "Y" and res != "y":
+    res = input("Does this map look correct? [Y/n] ")
+    if res == "N" or res == "n":
         print("Aborting.")
         sys.exit(1)
     
 
-    # applyTags(data, map)
+    applyTags(data, map)
+    print("Done!")
     
 
 def applyTags(data, map):
@@ -67,7 +65,7 @@ def applyTags(data, map):
         subprocess.call(renameCommand)
 
         # Move the file to ~/music/artist/album/
-        subprocess.call(["cp", newName, newDir])
+        subprocess.call(["mv", newName, newDir])
 
 
 # Currently pattern matches on song titles,
