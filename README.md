@@ -6,7 +6,7 @@ This script downloads an album and tags the songs from a wikipedia page.  The pr
 * Does not currently tag album art to songs
 * Does not prompt for download location
 * Only looks for the first track listing table on wikipedia.  Albums can be broken up by disc, or have different editions that do not align with playlist requested to download.  In these cases only half the songs can be tagged.
-* Does not prompt the user nearly enough about condition of the metadata
+* Regex to assign metadata to files is limited.  One bug for example is how the songs "Apple" and "Apple Pt. 2" might both me mapped to the same file, so one of the files could be excluded from metadata assignment.
 
 These limitations will be addressed as development continues.
 

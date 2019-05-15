@@ -24,7 +24,7 @@ def applyTags(data, map, save):
         # Add image tag if it was found
         if data["image"]:
             tagCommand = ["mid3v2", audiofile,
-                "-p", "/tmp/album-dl/art.png"]
+                "-p", "/tmp/album-dl/art.jpg"]
             subprocess.call(tagCommand)
             
 
@@ -48,7 +48,9 @@ def mapTitlesToFiles(data, audiofiles):
         # remove characters inside parenthesis
         short_title = re.sub("(\(.*\))", "", title[1]).strip()
         # remove all other characters
-        short_title = re.sub("[,\-\s'()*.]", "", short_title)
+        short_title = re.sub("[^A-Za-z0-9]+", "", short_title)
+
+        print(short_title)
 
         regex = re.compile(r'' + short_title, re.IGNORECASE)
         selected_file = list(filter(regex.search, audiofiles))

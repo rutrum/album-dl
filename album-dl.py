@@ -62,7 +62,7 @@ def renameFiles():
     newNames = []
     for name in names:
         newName = name[:-4] # remove .mp3
-        newName = re.sub("[,\-\s'()*.]", "", newName)
+        newName = re.sub("[^A-Za-z0-9]+", "", newName) # Remove all special chars
         newName = newName + ".mp3"
         subprocess.call(["mv", name, newName])
         newNames.append(newName)
