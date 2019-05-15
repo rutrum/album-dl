@@ -21,6 +21,13 @@ def applyTags(data, map, save):
             "-t", track[1]]
         subprocess.call(tagCommand)
 
+        # Add image tag if it was found
+        if data["image"]:
+            tagCommand = ["mid3v2", audiofile,
+                "-p", "/tmp/album-dl/art.png"]
+            subprocess.call(tagCommand)
+            
+
         # Now rename the file
         newName = track[0] + " " + track[1] + ".mp3"
         renameCommand = ["mv", audiofile, newName]

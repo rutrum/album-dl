@@ -10,6 +10,18 @@ This script downloads an album and tags the songs from a wikipedia page.  The pr
 
 These limitations will be addressed as development continues.
 
+## Tags
+
+Currently this program adds the following metadata to every mp3 file:
+* Artist
+* Album
+* Track title
+* Track number
+* Total tracks on album
+* Genre
+* Year of release
+* Album Art (when found)
+
 ## Requirements to Use
 * python3
 * [youtube-dl](https://github.com/ytdl-org/youtube-dl/blob/master/README.md) for downloading videos online

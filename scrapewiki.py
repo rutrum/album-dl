@@ -3,6 +3,7 @@ from lxml import html
 from bs4 import BeautifulSoup
 
 import re           # For regular expressions
+import urllib       # Downloading images from urls
 
 def scrape(url):
 
@@ -25,7 +26,30 @@ def scrape(url):
 
     data["trackTotal"] = str(len(data["tracks"]))
 
+    data["image"] = download_art(table, data["artist"])
+
     return data
+
+def download_art(table, album):
+
+    try:
+    
+        a = table.find("a", class_="image")
+        firsturl = "https://wikipedia.org" + a.get('href')
+
+        raw = requests.get(firsturl)
+        page = BeautifulSoup(raw.text, "lxml")
+
+        newa = page.find("div", class_="fullImageLink").find("a")
+        imageurl = "https:" + newa.get('href')
+
+        urllib.request.urlretrieve(imageurl, "/tmp/album-dl/art.jpg")
+
+    except:
+        return False
+
+    return True
+
 
 def get_genre(table):
 
@@ -34,7 +58,7 @@ def get_genre(table):
 
     # Then look at the next sibling of parent and find the first li element
     genreLi = genreLink.parent.next_sibling.find("li")
-    if genreLi.a:
+    if genreLi and genreLi.a:
         return genreLi.a.string.title()
     if genreLi:
         return genreLi.string.title()

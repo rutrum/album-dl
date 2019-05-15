@@ -11,19 +11,24 @@ def main():
     
     config = askConfig()
 
-    res = input("Are you sure about this operation? [Y/n] ")
-    if res == "n" or res == "N":
-        print("Aborting download.")
-        sys.exit(1)
+    # res = input("Are you sure about this operation? [Y/n] ")
+    # if res == "n" or res == "N":
+    #     print("Aborting download.")
+    #     sys.exit(1)
 
+    print("Downloading metadata...")
     metadata = scrapewiki.scrape(config["wiki-url"])
 
     print("")
     for key in metadata:
-        if key != "tracks" and key != "trackTotal":
-            print(key, ":", metadata[key])
+        if key != "tracks" and key != "trackTotal" and key != "image":
+            print(key, "\t", metadata[key])
     for track in metadata["tracks"]:
         print(" ", track[0], track[1])
+    if metadata["image"]:
+        print("Image found.")
+    else:
+        print("Image was not found.")
 
     res = input("Confirm this metadata is correct? [Y/n] ")
     if res == "n" or res == "N":
