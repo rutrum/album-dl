@@ -68,7 +68,7 @@ def renameFiles():
         newNames.append(newName)
     return newNames
     
-
+# Calls youtube-dl on the playlist url provided
 def downloadAudio(url):
     print("Audio download starting.")
     ytdl = ["youtube-dl",
