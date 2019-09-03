@@ -86,29 +86,30 @@ def get_titles(page):
         print("We found multiple tables of track information.")
         print("Please enter which tables you would like to use.")
         print("Please use space as delimeter, for example: 1 2")
+        print("By default, all tables will be used, in order.")
 
         for i in range(len(possible_titles)):
             print("**" + str(i) + "**")
             for track in possible_titles[i]:
                 print(" ", track[0], track[1])
 
-        res = input("Track tables [0]: ")
+        res = input("Track tables: ")
         selected_tracks = res.split()
         
         if len(selected_tracks) == 0:
-            return possible_titles[0]
-        else:
-            tracks = []
-            for selection in selected_tracks:
-                for new_track in possible_titles[int(selection)]:
-                    same_num = False
-                    for old_track in tracks:
-                        if new_track[0] == old_track[0]:
-                            # if the new track has a number already assigned
-                            same_num = True
-                    if not same_num:
-                        tracks.append(new_track)
-            return tracks
+            selected_tracks = range(len(possible_titles))
+
+        tracks = []
+        for selection in selected_tracks:
+            for new_track in possible_titles[int(selection)]:
+                same_num = False
+                for old_track in tracks:
+                    if new_track[0] == old_track[0]:
+                        # if the new track has a number already assigned
+                        same_num = True
+                if not same_num:
+                    tracks.append(new_track)
+        return tracks
 
 
     else:
@@ -126,11 +127,28 @@ def get_titles_from_table(table):
         # This will ignore any extra content next to title name
         # or 'parts' of songs (i.e. 2112 by Rush)
 
-        # BUG: Pulls text from second quotes, not first, see Fear Innoculum (Litany against Fear)
-        title = re.findall("([0-9]+)[.].*[\"](.*)[\"]", row.get_text())
-        if title:
-            title = list(title[0]) # only one occurance in each table row
-            title[0] = str(title[0]).zfill(2) # turns 1 into 01
-            titles.append(title)
+        # not as much a BUG: Pulls text from second quotes, not first, see Fear Innoculum (Litany against Fear)
+        # print(row.get_text())
+        # title = re.findall("^([0-9]+)[.]\"([.]+*)\"", row.get_text())
+        # (["'])(\\?.)*?\1
+        # title = re.findall("([0-9]+)[.].*([\"'])(\\?.)*?\1", row.get_text())
+        # print(title)
+
+        # # title = title.reverse()
+        # # title = re.findall("([\"'])(\\?.)*?\1", row.get_text())
+        # if title:
+        #     title = list(title[0]) # only one occurance in each table row
+        #     title[0] = str(title[0]).zfill(2) # turns 1 into 01
+        #     titles.append(title)
+
+        num = re.findall("([0-9]+)[.]", row.get_text())
+        title = re.findall(r'["](.*?)["]', row.get_text())
+
+        if num and title:
+            num = num[0]
+            title = title[0]
+            titles.append([num, title])
+        
+        print(num, title)
 
     return titles
