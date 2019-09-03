@@ -50,8 +50,6 @@ def mapTitlesToFiles(data, audiofiles):
         # remove all other characters
         short_title = re.sub("[^A-Za-z0-9]+", "", short_title)
 
-        print(short_title)
-
         regex = re.compile(r'' + short_title, re.IGNORECASE)
         selected_file = list(filter(regex.search, audiofiles))
 
