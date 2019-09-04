@@ -29,6 +29,7 @@ def applyTags(data, map, save):
             
 
         # Now rename the file
+        title = re.sub("/", " - ", track[1])
         newName = track[0] + " " + track[1] + ".mp3"
         renameCommand = ["mv", audiofile, newName]
         subprocess.call(renameCommand)
