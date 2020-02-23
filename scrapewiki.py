@@ -1,18 +1,27 @@
 import requests
 from lxml import html
 from bs4 import BeautifulSoup
+import os
 
 import re           # For regular expressions
 import urllib       # Downloading images from urls
 
-def scrape(url):
+def capture_page(url):
+    try:
+        raw = requests.get(url)
+        page = BeautifulSoup(raw.text, "lxml")
+        return page
+    except:
+        raise Exception("Wikipedia url is not valid.")
 
-    raw = requests.get(url)
-    page = BeautifulSoup(raw.text, "lxml")
+def get_metadata(page):
 
-    data = dict()
-
+    # Find the metadata table at top of page
     table = page.find("table", class_="infobox")
+    if table == None:
+        raise Exception("Metadata not found on wiki.")
+
+    data = {}
     
     data["artist"] = table.find("div", class_="contributor").string
     data["album"] = table.find("th", class_="album").string
@@ -22,18 +31,17 @@ def scrape(url):
 
     data["genre"] = get_genre(table)
 
-    data["tracks"] = get_titles(page)
+    # data["tracks"] = get_titles(page)
 
-    data["trackTotal"] = str(len(data["tracks"]))
+    # data["trackTotal"] = str(len(data["tracks"]))
 
-    data["image"] = download_art(table, data["artist"])
+    # data["image"] = download_art(table, data["artist"])
 
     return data
 
-def download_art(table, album):
-
+def download_art(page):
     try:
-    
+        table = page.find("table", class_="infobox")
         a = table.find("a", class_="image")
         firsturl = "https://wikipedia.org" + a.get('href')
 
@@ -46,9 +54,7 @@ def download_art(table, album):
         urllib.request.urlretrieve(imageurl, "/tmp/album-dl/art.jpg")
 
     except:
-        return False
-
-    return True
+        raise Exception("Failure to find image.")
 
 
 def get_genre(table):
@@ -67,54 +73,29 @@ def get_genre(table):
     return genreLink.parent.next_sibling.a.string.title()
 
 
-def get_titles(page):
+def get_track_tables(page):
 
-    titles = []
-
-    # Find the first tracklist table
-    # Does not work when broken up for mulitple discs 
-    # (see https://en.wikipedia.org/wiki/Diver_Down)
+    track_tables = []
 
     tables = page.find_all("table", class_="tracklist")
-    possible_titles = []
     for table in tables:
         titles = get_titles_from_table(table)
-        possible_titles.append(titles)
+        track_tables.append(titles)
 
-    if len(possible_titles) > 1:
-        # Ask user which titles to use
-        print("We found multiple tables of track information.")
-        print("Please enter which tables you would like to use.")
-        print("Please use space as delimeter, for example: 1 2")
-        print("By default, all tables will be used, in order.")
+    return track_tables
 
-        for i in range(len(possible_titles)):
-            print("**" + str(i) + "**")
-            for track in possible_titles[i]:
-                print(" ", track[0], track[1])
-
-        res = input("Track tables: ")
-        selected_tracks = res.split()
-        
-        if len(selected_tracks) == 0:
-            selected_tracks = range(len(possible_titles))
-
-        tracks = []
-        for selection in selected_tracks:
-            for new_track in possible_titles[int(selection)]:
-                same_num = False
-                for old_track in tracks:
-                    if new_track[0] == old_track[0]:
-                        # if the new track has a number already assigned
-                        same_num = True
-                if not same_num:
-                    tracks.append(new_track)
-        return tracks
-
-
-    else:
-        # Only found 1 table, return this
-        return possible_titles[0]
+def get_tracks(tables, table_indicies):
+    tracks = []
+    for i in table_indicies:
+        for new_track in tables[i]:
+            same_num = False
+            for old_track in tracks:
+                if new_track["num"] == old_track["num"]:
+                    # if the new track has a number already assigned
+                    same_num = True
+            if not same_num:
+                tracks.append(new_track)
+    return tracks
 
 def get_titles_from_table(table):
 
@@ -123,32 +104,17 @@ def get_titles_from_table(table):
     titles = []
 
     for row in rows:
-        # Find strings in quotes that follow numbers with periods afterwards
-        # This will ignore any extra content next to title name
-        # or 'parts' of songs (i.e. 2112 by Rush)
-
-        # not as much a BUG: Pulls text from second quotes, not first, see Fear Innoculum (Litany against Fear)
-        # print(row.get_text())
-        # title = re.findall("^([0-9]+)[.]\"([.]+*)\"", row.get_text())
-        # (["'])(\\?.)*?\1
-        # title = re.findall("([0-9]+)[.].*([\"'])(\\?.)*?\1", row.get_text())
-        # print(title)
-
-        # # title = title.reverse()
-        # # title = re.findall("([\"'])(\\?.)*?\1", row.get_text())
-        # if title:
-        #     title = list(title[0]) # only one occurance in each table row
-        #     title[0] = str(title[0]).zfill(2) # turns 1 into 01
-        #     titles.append(title)
-
         num = re.findall("([0-9]+)[.]", row.get_text())
         title = re.findall(r'["](.*?)["]', row.get_text())
 
         if num and title:
             num = num[0]
             title = title[0]
-            titles.append([num, title])
+            titles.append({
+                "num": num, 
+                "title": title,
+            })
         
-        print(num, title)
+        # print(num, title)
 
     return titles

@@ -87,10 +87,10 @@ def askConfig():
 
     print("Please enter wikipedia album url:")
     wikiURL = input()
-
+    
     config["yt-url"] = ytURL
     config["wiki-url"] = wikiURL
-    
+
     return config
 
 
