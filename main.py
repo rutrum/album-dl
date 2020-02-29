@@ -64,8 +64,8 @@ def main():
         os.makedirs(path, exist_ok=True)
         
         for name in new_names:
-            old_path = "/tmp/album-dl/{}.mp3".format(name)
-            new_path = "{}/{}.mp3".format(path, name)
+            old_path = "/tmp/album-dl/{}.mp3".format(name["old"])
+            new_path = "{}/{}.mp3".format(path, name["new"])
             os.rename(old_path, new_path)
         
         
@@ -112,7 +112,9 @@ def print_mapping(mapping):
     print()
     cprint("{:>20}  {}".format("Song Title", "Video Title"), attrs=['bold'])
     for (key, val) in mapping.items():
-        print("{:>20}  {}".format(key, val))
+        # Doesn't lookup when empty (string)
+        # TODO
+        print("{:>20}  {}".format(key, val["title"]))
 
 def print_metadata(data):
     print()
