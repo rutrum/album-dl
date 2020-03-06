@@ -1,4 +1,6 @@
 import re
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process 
 from unidecode import unidecode
 
 def mapTitlesToFiles(tracks, yt_titles):
@@ -15,15 +17,18 @@ def mapTitlesToFiles(tracks, yt_titles):
     yt_shorts = list(map(lambda x: x["clean"], yt_titles))
 
     for track in tracks:
-        regex = re.compile(r'' + track["clean"])
-        selected_short = list(filter(regex.search, yt_shorts))
+        # regex = re.compile(r'' + track["clean"])
+        # selected_short = list(filter(regex.search, yt_shorts))
 
         # ERROR HERE
         # Only looks at first match (bad when one song is subtring of another)
         # See saints an sinners by whitesnake
-        selected_file = ""
-        if len(selected_short) > 0:
-            selected_file = shortToFilename[selected_short[0]]
+        # selected_file = ""
+        # if len(selected_short) > 0:
+        #     selected_file = shortToFilename[selected_short[0]]
+
+        selected_short = process.extractOne(track["clean"], yt_shorts)
+        selected_file = shortToFilename[selected_short[0]]
 
         mapToFile[track["title"]] = selected_file
 
