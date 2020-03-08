@@ -11,9 +11,9 @@ def tag_songs(tracks, meta, mapping):
 
     for track in tracks:
         
-        filename = mapping[track["title"]]["filename"]
-        if filename:
-            path = "/tmp/album-dl/{}.mp3".format(filename)
+        yt_video = mapping[track]
+        if yt_video:
+            path = "/tmp/album-dl/{}.mp3".format(yt_video.id)
             audiofile = eyed3.load(path)
 
             audiofile.tag.artist = meta["artist"]
@@ -21,22 +21,21 @@ def tag_songs(tracks, meta, mapping):
             audiofile.tag.recording_date = eyed3.core.Date(int(meta["year"]))
             audiofile.tag.genre = meta["genre"]
 
-            audiofile.tag.title = track["title"]
-            audiofile.tag.track_num = (track["num"], total_tracks)
+            audiofile.tag.title = track.title
+            audiofile.tag.track_num = (track.num, total_tracks)
 
             if os.path.exists("/tmp/album-dl/art.jpg"):
                 audiofile.tag.images.set(3, open("/tmp/album-dl/art.jpg", "rb").read(), 'image/jpeg')
 
             newname = "{:02d} {}".format(
-                int(track["num"]), 
-                track["title"]
+                int(track.num), 
+                track.title
             )
             # audiofile.rename(newname)
             audiofile.tag.save()
             new_names.append({
-                "old": filename,
-                "new": newname,
-                "title": track["title"]
+                "old": yt_video.id,
+                "new": newname
             })
 
 

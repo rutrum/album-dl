@@ -3,6 +3,8 @@ from lxml import html
 from bs4 import BeautifulSoup
 import os
 
+from models import WikiTrack
+
 import re           # For regular expressions
 import urllib       # Downloading images from urls
 
@@ -90,7 +92,7 @@ def get_tracks(tables, table_indicies):
         for new_track in tables[i]:
             same_num = False
             for old_track in tracks:
-                if new_track["num"] == old_track["num"]:
+                if new_track.num == old_track.num:
                     # if the new track has a number already assigned
                     same_num = True
             if not same_num:
@@ -110,11 +112,8 @@ def get_titles_from_table(table):
         if num and title:
             num = num[0]
             title = title[0]
-            titles.append({
-                "num": num, 
-                "title": title,
-            })
-        
-        # print(num, title)
+            titles.append(
+                WikiTrack(num, title)
+            )
 
     return titles

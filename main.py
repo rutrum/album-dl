@@ -1,3 +1,6 @@
+from models import YTVideo
+from models import WikiTrack 
+
 import scrapewiki as wiki
 import ytdl
 import match
@@ -14,13 +17,13 @@ def main():
     if not os.path.exists("/tmp/album-dl"):
         os.makedirs("/tmp/album-dl")
 
-    yt_url = input("Enter youtube url:\n")
-    # yt_url = "https://www.youtube.com/watch?v=lvGmsPPg-vY&list=PLgLk-j8sdm7aYI39NH5oGvNwcyrY_O-wA"
+    # yt_url = input("Enter youtube url:\n")
+    yt_url = "https://www.youtube.com/watch?v=avgiqNapUx0&list=PLcTz7Wlk_9U3Weklyt9mgcARhEJie4qMP"
     song_downloader = pool.apply_async(ytdl.song_titles, (yt_url, )) 
     print("Downloading youtube playlist metadata...")
 
-    wiki_url = input("Enter wikipedia url:\n")
-    # wiki_url = "https://en.wikipedia.org/wiki/Saints_%26_Sinners_(Whitesnake_album)"
+    # wiki_url = input("Enter wikipedia url:\n")
+    wiki_url = "https://en.wikipedia.org/wiki/Mer_de_Noms"
 
     try:
         wiki_page = wiki.capture_page(wiki_url)
@@ -47,10 +50,6 @@ def main():
                 print(last_msg)
 
         yt_song_titles = song_downloader.get()  
-        # fileh = open("yt_titles.txt")
-        # yt_song_titles = []
-        # for line in fileh:
-        #     yt_song_titles.append({ "title": line.strip() })
 
         mapping = match.mapTitlesToFiles(tracks, yt_song_titles) 
 
@@ -91,7 +90,7 @@ def select_tables(tables):
         for (i, table) in enumerate(tables):
             print("***{:^14}***".format(i))
             for track in table:
-                print("{:>3}. ".format(track["num"]), track["title"])
+                print("{:>3}. ".format(track.num), track.title)
 
         res = input("Track tables: ")
         selected_tracks = list(map(lambda x: int(x), res.split()))
@@ -112,14 +111,14 @@ def select_tables(tables):
 
 def print_mapping(mapping):
     print()
-    cprint("{:>20}  {}".format("Song Title", "Video Title"), attrs=['bold'])
+    cprint("{:>30}  {}".format("Song Title", "Video Title"), attrs=['bold'])
     for (key, val) in mapping.items():
         # Doesn't lookup when empty (string)
         # TODO
         if val:
-            print("{:>20}  {}".format(key, val["title"]))
+            print("{:>30}  {}".format(key.title, val.title))
         else:
-            print("{:>20}  {}".format(key, val))
+            print("{:>30}  {}".format(key.title, val))
 
 def print_metadata(data):
     print()
@@ -129,7 +128,7 @@ def print_metadata(data):
 def print_tracks(tracks):
     print()
     for track in tracks:
-        print("{:>3}. ".format(track["num"]), track["title"])
+        print("{:>3}. ".format(track.num), track.title)
 
 if __name__ == "__main__":
     main()

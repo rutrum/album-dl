@@ -1,4 +1,5 @@
 from youtube_dl import YoutubeDL
+from models import YTVideo
 
 msg_status = ""
 
@@ -33,10 +34,7 @@ def song_titles(url):
         meta = ydl.extract_info(url, download=False)
         entries = meta["entries"]
 
-        return list(map(lambda x: { 
-            "id": x["id"],
-            "title": x["title"]
-        }, entries))
+        return list(map(lambda x: YTVideo(x), entries))
 
 def download_songs(url):
     ydl_opts = { 
@@ -47,9 +45,7 @@ def download_songs(url):
             'preferredquality': '192',
         }],
         'format': 'bestaudio/best',
-        # 'outtmpl': '%(title)s.%(ext)s'
         'outtmpl': '/tmp/album-dl/%(id)s.%(ext)s'
-        # This file name fails when video titles have double quotes (get replaced to single)
     }
 
     with YoutubeDL(ydl_opts) as ydl:

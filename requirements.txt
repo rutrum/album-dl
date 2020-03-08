@@ -1,0 +1,4 @@
+youtube-dl
+termcolor
+fuzzywuzzy[speedup]
+fuzzywuzzy
