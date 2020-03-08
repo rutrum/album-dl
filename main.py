@@ -17,13 +17,13 @@ def main():
     if not os.path.exists("/tmp/album-dl"):
         os.makedirs("/tmp/album-dl")
 
-    # yt_url = input("Enter youtube url:\n")
-    yt_url = "https://www.youtube.com/watch?v=avgiqNapUx0&list=PLcTz7Wlk_9U3Weklyt9mgcARhEJie4qMP"
+    yt_url = input("Enter youtube url:\n")
+    # yt_url = "https://www.youtube.com/watch?v=avgiqNapUx0&list=PLcTz7Wlk_9U3Weklyt9mgcARhEJie4qMP"
     song_downloader = pool.apply_async(ytdl.song_titles, (yt_url, )) 
     print("Downloading youtube playlist metadata...")
 
-    # wiki_url = input("Enter wikipedia url:\n")
-    wiki_url = "https://en.wikipedia.org/wiki/Mer_de_Noms"
+    wiki_url = input("Enter wikipedia url:\n")
+    # wiki_url = "https://en.wikipedia.org/wiki/Mer_de_Noms"
 
     try:
         wiki_page = wiki.capture_page(wiki_url)
