@@ -11,7 +11,7 @@ def tag_songs(tracks, meta, mapping):
 
     for track in tracks:
         
-        filename = mapping[track["title"]]
+        filename = mapping[track["title"]]["filename"]
         if filename:
             path = "/tmp/album-dl/{}.mp3".format(filename)
             audiofile = eyed3.load(path)
@@ -31,9 +31,13 @@ def tag_songs(tracks, meta, mapping):
                 int(track["num"]), 
                 track["title"]
             )
-            audiofile.rename(newname)
+            # audiofile.rename(newname)
             audiofile.tag.save()
-            new_names.append(newname)
+            new_names.append({
+                "old": filename,
+                "new": newname,
+                "title": track["title"]
+            })
 
 
     return new_names

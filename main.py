@@ -15,10 +15,12 @@ def main():
         os.makedirs("/tmp/album-dl")
 
     yt_url = input("Enter youtube url:\n")
+    # yt_url = "https://www.youtube.com/watch?v=lvGmsPPg-vY&list=PLgLk-j8sdm7aYI39NH5oGvNwcyrY_O-wA"
     song_downloader = pool.apply_async(ytdl.song_titles, (yt_url, )) 
     print("Downloading youtube playlist metadata...")
 
     wiki_url = input("Enter wikipedia url:\n")
+    # wiki_url = "https://en.wikipedia.org/wiki/Saints_%26_Sinners_(Whitesnake_album)"
 
     try:
         wiki_page = wiki.capture_page(wiki_url)
@@ -64,8 +66,8 @@ def main():
         os.makedirs(path, exist_ok=True)
         
         for name in new_names:
-            old_path = "/tmp/album-dl/{}.mp3".format(name)
-            new_path = "{}/{}.mp3".format(path, name)
+            old_path = "/tmp/album-dl/{}.mp3".format(name["old"])
+            new_path = "{}/{}.mp3".format(path, name["new"])
             os.rename(old_path, new_path)
         
         
@@ -112,7 +114,12 @@ def print_mapping(mapping):
     print()
     cprint("{:>20}  {}".format("Song Title", "Video Title"), attrs=['bold'])
     for (key, val) in mapping.items():
-        print("{:>20}  {}".format(key, val))
+        # Doesn't lookup when empty (string)
+        # TODO
+        if val:
+            print("{:>20}  {}".format(key, val["title"]))
+        else:
+            print("{:>20}  {}".format(key, val))
 
 def print_metadata(data):
     print()

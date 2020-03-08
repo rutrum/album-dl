@@ -6,6 +6,8 @@ from unidecode import unidecode
 def mapTitlesToFiles(tracks, yt_titles):
 
     mapToFile = {}
+
+    # Add clean string keyvals to both tracks and yt_titles
     for track in tracks:
         track.update({ "clean": clean_string(track["title"]) })
     for title in yt_titles:
@@ -13,12 +15,14 @@ def mapTitlesToFiles(tracks, yt_titles):
 
     shortToFilename = {}
     for title in yt_titles:
-        shortToFilename[title["clean"]] = title["title"]
+        shortToFilename[title["clean"]] = (title["id"], title["title"])
     yt_shorts = list(map(lambda x: x["clean"], yt_titles))
 
     for track in tracks:
         # regex = re.compile(r'' + track["clean"])
         # selected_short = list(filter(regex.search, yt_shorts))
+        # regex = re.compile(r'' + track["clean"])
+        # selected_short = list(filter(lambda x: regex.search(x["clean"]), yt_titles))
 
         # ERROR HERE
         # Only looks at first match (bad when one song is subtring of another)
@@ -27,31 +31,14 @@ def mapTitlesToFiles(tracks, yt_titles):
         # if len(selected_short) > 0:
         #     selected_file = shortToFilename[selected_short[0]]
 
-        selected_short = process.extractOne(track["clean"], yt_shorts)
-        selected_file = shortToFilename[selected_short[0]]
+        selected_short, _ = process.extractOne(track["clean"], yt_shorts)
+        selected_file, title = shortToFilename[selected_short]
 
-        mapToFile[track["title"]] = selected_file
+        mapToFile[track["title"]] = {
+            "filename": selected_file,
+            "title": title
+        }
 
-    return mapToFile
-        
-
-    for title in data["tracks"]:
-
-        # remove characters inside parenthesis
-        short_title = re.sub("(\(.*\))", "", title[1]).strip()
-        # remove all other characters
-        short_title = re.sub("[^A-Za-z0-9]+", "", short_title)
-
-        regex = re.compile(r'' + short_title, re.IGNORECASE)
-        selected_file = list(filter(regex.search, audiofiles))
-
-        if len(selected_file) > 0:
-            selected_file = selected_file[0]
-        else:
-            selected_file = ""
-
-        mapToFile[title[1]] = selected_file
-    
     return mapToFile
 
 def clean_string(title):

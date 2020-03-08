@@ -33,7 +33,10 @@ def song_titles(url):
         meta = ydl.extract_info(url, download=False)
         entries = meta["entries"]
 
-        return list(map(lambda x: { "title": x["title"]}, entries))
+        return list(map(lambda x: { 
+            "id": x["id"],
+            "title": x["title"]
+        }, entries))
 
 def download_songs(url):
     ydl_opts = { 
@@ -45,11 +48,13 @@ def download_songs(url):
         }],
         'format': 'bestaudio/best',
         # 'outtmpl': '%(title)s.%(ext)s'
-        'outtmpl': '/tmp/album-dl/%(title)s.%(ext)s'
+        'outtmpl': '/tmp/album-dl/%(id)s.%(ext)s'
+        # This file name fails when video titles have double quotes (get replaced to single)
     }
 
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
 if __name__ == "__main__":
-    download_songs("https://www.youtube.com/watch?v=GtUxPg9jRLM")
+    x = song_titles("https://www.youtube.com/watch?v=TBQK4gnmDtQ&list=PL9hYR5qRkc2yZKwmwDGNwD9d5r2_8bYtu")
+    print(x)
