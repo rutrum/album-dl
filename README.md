@@ -1,14 +1,10 @@
 # album-dl
 
-This script downloads an album and tags the songs from a wikipedia page.  The programs asks for a youtube playlist and a wikipedia link to the album.  It will download the music, scrape the wiki page for metadata, and then tag the songs.  It is _limited in its capabilities,_ but works for many cases nonetheless.
+This script downloads an album from youtube and tags the songs from a wikipedia page.  The programs asks for a youtube playlist and a wikipedia link to the album.  It will download the music, scrape the wiki page for metadata, and then tag the songs.  There are edge cases where scraping and matching tags doesn't provide the correct results, but it works for a majority of cases regardless.
 
-## Limitations of the Program
-* Does not currently tag album art to songs
-* Does not prompt for download location
-* Only looks for the first track listing table on wikipedia.  Albums can be broken up by disc, or have different editions that do not align with playlist requested to download.  In these cases only half the songs can be tagged.
-* Regex to assign metadata to files is limited.  One bug for example is how the songs "Apple" and "Apple Pt. 2" might both me mapped to the same file, so one of the files could be excluded from metadata assignment.
+## Limitations
 
-These limitations will be addressed as development continues.
+The program is automated to work on my machine.  It doesn't prompt the user or read a configuration file for things like where to store the music after tagging.  In addition, when something fails, there is no opportunity to manually make changes.  Either everything gets tagged by the algorithm or the user can abort the program.  If you plan on trying out the application, be aware.
 
 ## Tags
 
@@ -22,8 +18,8 @@ Currently this program adds the following metadata to every mp3 file:
 * Year of release
 * Album Art (when found)
 
-## Requirements to Use
-* python3
-* [youtube-dl](https://github.com/ytdl-org/youtube-dl/blob/master/README.md) for downloading videos online
-* [mutagen](https://mutagen.readthedocs.io/en/latest/) for tagging audio files
-* [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/#Download) for scraping webpages
+## Future features
+
+* Better loading bars
+* Configuration file/prompt for download location
+* Even better metadata to video matching
