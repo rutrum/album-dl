@@ -22,4 +22,3 @@ Currently this program adds the following metadata to every mp3 file:
 
 * Better loading bars
 * Configuration file/prompt for download location
-* Even better metadata to video matching
