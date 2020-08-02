@@ -1,13 +1,15 @@
 from youtube_dl import YoutubeDL
 from models import YTVideo
+import re
 
-msg_status = ""
+msg_status = (0,0) 
 
 class QuietLogger(object):
     def debug(self, msg):
         global msg_status
         if "[download] Downloading video" in msg:
-            msg_status = msg[11:]
+            current, total = re.findall(r"(\d+) of (\d+)", msg)[0]
+            msg_status = (int(current), int(total))
 
     def warning(self, msg):
         pass

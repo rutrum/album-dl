@@ -6,6 +6,8 @@ import ytdl
 import match
 import tagger as tag
 
+import progressbar
+
 import youtube_dl
 import os
 from termcolor import cprint
@@ -44,10 +46,15 @@ def main():
 
         print("Downloading youtube playlist metadata...")
         last_msg = ""
-        while not song_downloader.ready():
-            if ytdl.msg_status != last_msg:
-                last_msg = ytdl.msg_status
-                print(last_msg)
+        current, total = ytdl.msg_status
+        with progressbar.ProgressBar(max_value=total, widgets=[progressbar.Bar()]) as bar:
+        # with tqdm(total=ytdl.msg_status[1], postfix="") as pbar:
+            bar.update(current)
+            while not song_downloader.ready():
+                if ytdl.msg_status != last_msg:
+                    current, total = ytdl.msg_status
+                    bar.update(current)
+                    # print("|{:<20}|".format((20*int(current)//int(total))*"*"))
 
         yt_song_titles = song_downloader.get()  
 
@@ -111,14 +118,14 @@ def select_tables(tables):
 
 def print_mapping(mapping):
     print()
-    cprint("{:>30}  {}".format("Song Title", "Video Title"), attrs=['bold'])
+    cprint("{:>30}   {}".format("Song Title", "Video Title"), attrs=['bold'])
     for (key, val) in mapping.items():
         # Doesn't lookup when empty (string)
         # TODO
         if val:
-            print("{:>30}  {}".format(key.title, val.title))
+            print("{:>30}   {}".format(key.title, val.title))
         else:
-            print("{:>30}  {}".format(key.title, val))
+            print("{:>30}   {}".format(key.title, val))
 
 def print_metadata(data):
     print()
