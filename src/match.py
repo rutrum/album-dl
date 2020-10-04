@@ -15,7 +15,7 @@ def mapTitlesToFiles(tracks, yt_titles):
             scorer=lambda x,y: fuzz.WRatio(x, y.clean)
         )
 
-        if how_well > 60:
+        if how_well > 40:
             mapToFile[track] = selected_yt
         else:
             mapToFile[track] = "" 

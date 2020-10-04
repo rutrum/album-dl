@@ -44,7 +44,25 @@ def main():
         print_metadata(metadata)
         print_tracks(tracks)
 
-        confirm()
+        while not confirm():
+            print("What do you want to change?")
+            print("[artist|album|year|genre|track ##]")
+            k = input(": ").lower()
+            if k in metadata:
+                newval = input("New value for {}: ".format(k))
+                metadata[k] = newval
+            elif k.split()[0] == "track":
+                num = k.split()[1]
+                for track in tracks:
+                    if num == track.num:
+                        newval = input("New title for track {}: ".format(track.num))
+                        track.title = newval
+            else:
+                print("Not a valid field.")
+
+            print_metadata(metadata)
+            print_tracks(tracks)
+
 
         print("Downloading youtube playlist metadata...")
         last_msg = ""
@@ -64,7 +82,8 @@ def main():
 
         print_mapping(mapping)
             
-        confirm()
+        if not confirm():
+            exit()
 
         ytdl.download_songs(yt_url)
 
@@ -86,9 +105,9 @@ def main():
 def confirm():
     response = input("\nIs this correct? [Y/n] ")
     if response not in "Yy":
-        exit()
+        return False
     else:
-        print()
+        return True
 
 def select_tables(tables):
     if len(tables) > 1:
