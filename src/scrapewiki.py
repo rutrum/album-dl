@@ -86,17 +86,21 @@ def get_track_tables(page):
 
     return track_tables
 
-def get_tracks(tables, table_indicies):
+def get_tracks(tables, renumber, table_indicies):
     tracks = []
-    for i in table_indicies:
+    for renum, i in zip(renumber, table_indicies):
         for new_track in tables[i]:
-            same_num = False
-            for old_track in tracks:
-                if new_track.num == old_track.num:
-                    # if the new track has a number already assigned
-                    same_num = True
-            if not same_num:
+            if renum:
+                new_track.num = len(tracks) + 1
                 tracks.append(new_track)
+            else:
+                same_num = False
+                for old_track in tracks:
+                    if new_track.num == old_track.num:
+                        # if the new track has a number already assigned
+                        same_num = True
+                if not same_num:
+                    tracks.append(new_track)
     return tracks
 
 def get_titles_from_table(table):

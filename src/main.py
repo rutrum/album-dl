@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Something to improve: caching for when this certainly fails
+# Just write progress to a file in tmp and initialize from it
+# if the file exists
+
 from models import YTVideo
 from models import WikiTrack 
 
@@ -7,6 +11,7 @@ import scrapewiki as wiki
 import ytdl
 import match
 import tagger as tag
+import shutil
 
 import progressbar
 
@@ -21,13 +26,13 @@ def main():
     if not os.path.exists("/tmp/album-dl"):
         os.makedirs("/tmp/album-dl")
 
-    yt_url = input("Enter youtube url:\n")
-    # yt_url = "https://www.youtube.com/watch?v=avgiqNapUx0&list=PLcTz7Wlk_9U3Weklyt9mgcARhEJie4qMP"
+    # yt_url = input("Enter youtube url:\n")
+    yt_url = "https://www.youtube.com/watch?v=54LFO6HrL3U&list=PLmRlvxlJ-cbhxkgKT1YdSGwGzGaQU_cVy&index=1"
     song_downloader = pool.apply_async(ytdl.song_titles, (yt_url, )) 
     print("Downloading youtube playlist metadata...")
 
-    wiki_url = input("Enter wikipedia url:\n")
-    # wiki_url = "https://en.wikipedia.org/wiki/Mer_de_Noms"
+    # wiki_url = input("Enter wikipedia url:\n")
+    wiki_url = "https://en.wikipedia.org/wiki/Six_Degrees_of_Inner_Turbulence"
 
     try:
         wiki_page = wiki.capture_page(wiki_url)
@@ -38,8 +43,8 @@ def main():
 
         track_tables = wiki.get_track_tables(wiki_page)
 
-        table_indicies = select_tables(track_tables)
-        tracks = wiki.get_tracks(track_tables, table_indicies)
+        table_indicies, track_renumber = select_tables(track_tables)
+        tracks = wiki.get_tracks(track_tables, track_renumber, table_indicies)
 
         print_metadata(metadata)
         print_tracks(tracks)
@@ -67,14 +72,9 @@ def main():
         print("Downloading youtube playlist metadata...")
         last_msg = ""
         current, total = ytdl.msg_status
-        with progressbar.ProgressBar(max_value=total, widgets=[progressbar.Bar()]) as bar:
-        # with tqdm(total=ytdl.msg_status[1], postfix="") as pbar:
-            bar.update(current)
-            while not song_downloader.ready():
-                if ytdl.msg_status != last_msg:
-                    current, total = ytdl.msg_status
-                    bar.update(current)
-                    # print("|{:<20}|".format((20*int(current)//int(total))*"*"))
+        while not song_downloader.ready():
+            if ytdl.msg_status != last_msg:
+                current, total = ytdl.msg_status
 
         yt_song_titles = song_downloader.get()  
 
@@ -95,7 +95,8 @@ def main():
         for name in new_names:
             old_path = "/tmp/album-dl/{}.mp3".format(name["old"])
             new_path = "{}/{}.mp3".format(path, name["new"])
-            os.rename(old_path, new_path)
+            shutil.move(old_path, new_path) # can move across file systems
+            #os.rename(old_path, new_path)  # cannot
         
         
     except Exception as ex:
@@ -113,6 +114,7 @@ def select_tables(tables):
     if len(tables) > 1:
         print("Please enter which track tables you would like to use.")
         print("Please use space as delimeter, for example: 1 2")
+        print("To append tracks to end, add * before number: 1 *2")
         print("By default, all tables will be used, in order.")
 
         for (i, table) in enumerate(tables):
@@ -121,17 +123,30 @@ def select_tables(tables):
                 print("{:>3}. ".format(track.num), track.title)
 
         res = input("Track tables: ")
-        selected_tracks = list(map(lambda x: int(x), res.split()))
+        
+        selected_tracks = []
+        renumber = []
+
+        for v in res.split():
+            if v[0] == "*":
+                renumber += [True]
+                selected_tracks += [int(v[1:])]
+            else:
+                renumber += [False]
+                selected_tracks += [int(v)]
 
         if len(selected_tracks) == 0:
-            return list(range(len(tables)))
+            l = len(tables)
+            renumber = [ False for i in range(l) ]
+            selected_tracks = list(range(l))
+            return selected_tracks, renumber
 
         for selection in selected_tracks:
             if selection > len(tables) or selection < 0:
                 cprint("Please select valid tables.", "red")
                 return select_tables(tables)
         
-        return selected_tracks
+        return selected_tracks, renumber
 
     else:
         # Only found 1 table, return this

@@ -27,9 +27,11 @@ def tag_songs(tracks, meta, mapping):
             if os.path.exists("/tmp/album-dl/art.jpg"):
                 audiofile.tag.images.set(3, open("/tmp/album-dl/art.jpg", "rb").read(), 'image/jpeg')
 
+            clean_title = track.title.replace("/", "-")
+
             newname = "{:02d} {}".format(
                 int(track.num), 
-                track.title
+                clean_title
             )
             # audiofile.rename(newname)
             audiofile.tag.save()
