@@ -3,7 +3,7 @@ from lxml import html
 from bs4 import BeautifulSoup
 import os
 
-from models import WikiTrack
+from models import WikiTrack, Metadata
 
 import re           # For regular expressions
 import urllib       # Downloading images from urls
@@ -23,23 +23,8 @@ def get_metadata(page):
     if table == None:
         raise Exception("Metadata not found on wiki.")
 
-    data = {}
-    
-    data["artist"] = table.find("div", class_="contributor").string
-    data["album"] = table.find("th", class_="album").string
-
-    yearElement = table.find("td", class_="published")
-    data["year"] = re.findall("[0-9]{4}", str(yearElement))[0]
-
-    data["genre"] = get_genre(table)
-
-    # data["tracks"] = get_titles(page)
-
-    # data["trackTotal"] = str(len(data["tracks"]))
-
-    # data["image"] = download_art(table, data["artist"])
-
-    return data
+    metadata = Metadata(table)
+    return metadata
 
 def download_art(page):
     try:

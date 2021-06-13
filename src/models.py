@@ -13,6 +13,12 @@ class YTVideo:
     def filename(self):
         return "{}.mp3".format(self.id)
 
+    def path(self):
+        return "/tmp/album-dl/{}.mp3".format(self.id)
+
+    def __str__(self):
+        return "{}: {}".format(self.id, self.title)
+
 
 class WikiTrack:
     
@@ -22,6 +28,8 @@ class WikiTrack:
         # considering using .lower() but may be unnecessary
         self.clean = unidecode(self.title)
 
+    def __str__(self):
+        return "{:>3}. {}".format(self.num, self.title)
 
 class Metadata:
 
@@ -32,7 +40,7 @@ class Metadata:
         yearElement = table.find("td", class_="published")
         self.year = re.findall("[0-9]{4}", str(yearElement))[0]
 
-        self.genre = self.get_genre(table)
+        self.genre = Metadata.get_genre(table)
 
     def get_genre(table):
 
@@ -48,6 +56,18 @@ class Metadata:
         
         # If that didn't work, its a comma seperated list of links
         return genreLink.parent.next_sibling.a.string.title()
+
+    def __getitem__(self, name):
+        return getattr(self, name)
+
+    def keys():
+        return ["artist", "album", "year", "genre"]
+
+    def __str__(self):
+        s = ""
+        for key in Metadata.keys():
+            s += "{:>10}  {}\n".format(key.capitalize(), self[key])
+        return s
 
 
 # Just for reference

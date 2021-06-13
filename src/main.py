@@ -5,7 +5,7 @@
 # if the file exists
 
 from models import YTVideo
-from models import WikiTrack 
+from models import WikiTrack, Metadata
 
 import scrapewiki as wiki
 import ytdl
@@ -22,17 +22,24 @@ import sys
 from multiprocessing.pool import ThreadPool
 
 def main():
+
+    if len(sys.argv) < 3:
+        print("usage: album-dl yt_url wiki_url")
+        exit()
+
     pool = ThreadPool(processes=1)
     if not os.path.exists("/tmp/album-dl"):
         os.makedirs("/tmp/album-dl")
 
-    # yt_url = input("Enter youtube url:\n")
-    yt_url = "https://www.youtube.com/watch?v=54LFO6HrL3U&list=PLmRlvxlJ-cbhxkgKT1YdSGwGzGaQU_cVy&index=1"
+    yt_url = sys.argv[1]
+    #yt_url = input("Enter youtube url:\n")
+    # yt_url = "https://www.youtube.com/watch?v=DHd51Y7dhW0&list=PLONR6CCwpAARTIZ69LUgLW1cdEyM4Rn5e"
     song_downloader = pool.apply_async(ytdl.song_titles, (yt_url, )) 
     print("Downloading youtube playlist metadata...")
 
+    wiki_url = sys.argv[2]
     # wiki_url = input("Enter wikipedia url:\n")
-    wiki_url = "https://en.wikipedia.org/wiki/Six_Degrees_of_Inner_Turbulence"
+    # wiki_url = "https://en.wikipedia.org/wiki/When_Dream_and_Day_Unite"
 
     try:
         wiki_page = wiki.capture_page(wiki_url)
@@ -46,17 +53,19 @@ def main():
         table_indicies, track_renumber = select_tables(track_tables)
         tracks = wiki.get_tracks(track_tables, track_renumber, table_indicies)
 
-        print_metadata(metadata)
-        print_tracks(tracks)
+        print()
+        print(metadata)
+        for track in tracks:
+            print(track)
 
         while not confirm():
             print("What do you want to change?")
             print("[artist|album|year|genre|track ##]")
             k = input(": ").lower()
-            if k in metadata:
+            if k in Metadata.keys():
                 newval = input("New value for {}: ".format(k))
                 metadata[k] = newval
-            elif k.split()[0] == "track":
+            elif k and k.split()[0] == "track":
                 num = k.split()[1]
                 for track in tracks:
                     if num == track.num:
@@ -65,8 +74,10 @@ def main():
             else:
                 print("Not a valid field.")
 
-            print_metadata(metadata)
-            print_tracks(tracks)
+            print()
+            print(metadata)
+            for track in tracks:
+                print(track)
 
 
         print("Downloading youtube playlist metadata...")
@@ -78,12 +89,29 @@ def main():
 
         yt_song_titles = song_downloader.get()  
 
-        mapping = match.mapTitlesToFiles(tracks, yt_song_titles) 
+        mapping, unmatched = match.mapTitlesToFiles(tracks, yt_song_titles) 
 
-        print_mapping(mapping)
+        print_mapping(mapping, unmatched)
             
-        if not confirm():
-            exit()
+        while not confirm():
+            if unmatched:
+                song = unmatched.pop(0)
+                print()
+                for track in mapping:
+                    print(track)
+                print("What does {} match with?".format(song.title))
+                i = input("> ")
+                success = False
+                for track in mapping:
+                    if track.num == i:
+                        mapping[track] = song
+                        print_mapping(mapping, unmatched)
+                        success = True
+                        break
+
+                if not success:
+                    print("Not a valid track number")
+                    print_mapping(mapping, unmatched)
 
         ytdl.download_songs(yt_url)
 
@@ -150,9 +178,9 @@ def select_tables(tables):
 
     else:
         # Only found 1 table, return this
-        return [0]
+        return [False], [0]
 
-def print_mapping(mapping):
+def print_mapping(mapping, unmatched):
     print()
     cprint("{:>30}   {}".format("Song Title", "Video Title"), attrs=['bold'])
     for (key, val) in mapping.items():
@@ -163,15 +191,11 @@ def print_mapping(mapping):
         else:
             print("{:>30}   {}".format(key.title, val))
 
-def print_metadata(data):
-    print()
-    for key in data:
-        print("{:>10}  ".format(key.capitalize()), data[key])
-
-def print_tracks(tracks):
-    print()
-    for track in tracks:
-        print("{:>3}. ".format(track.num), track.title)
+    if unmatched:
+        print()
+        print("Unmatched songs:")
+        for track in unmatched:
+            print(track.title)
 
 if __name__ == "__main__":
     main()
